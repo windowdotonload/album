@@ -180,7 +180,7 @@ const next = () => {
 .album__breviary-etc {
   position: absolute;
   top: 0px;
-  right: 0px;
+  right: -1%;
   width: v-bind(etcHeight);
   height: v-bind(etcHeight);
   line-height: v-bind(etcHeight);
