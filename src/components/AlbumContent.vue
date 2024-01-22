@@ -29,7 +29,7 @@
         :key="item.id"
         class="album-content__dir-list-outer"
       >
-        <AblutmItem :albumItem="item" :width="260" :height="260" type="pic" />
+        <AblutmItem :albumItem="item" :width="200" :height="200" type="pic" />
         <div class="album-content__dir-pic-info">
           <span class="album-content__info-name">
             {{ item.name }}
@@ -167,8 +167,8 @@ const clearScrollState = () => {
 }
 .album-content__dir-list-pic {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 260px);
-  grid-template-rows: repeat(auto-fill, 300px);
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(auto-fill, 260px);
   justify-content: space-between;
   row-gap: 20px;
 }
@@ -176,7 +176,7 @@ const clearScrollState = () => {
 .album-content__dir-pic-info {
   box-sizing: border-box;
   font-size: 15px;
-  width: 260px;
+  width: 200px;
   padding: 10px;
   display: flex;
   align-items: center;
