@@ -31,9 +31,9 @@
       >
         <AblutmItem :albumItem="item" :width="260" :height="260" type="pic" />
         <div class="album-content__dir-pic-info">
-          <span class="album-content__info-name">{{
-            item.name.split("-")[0]
-          }}</span>
+          <span class="album-content__info-name">
+            {{ item.name }}
+          </span>
           <span style="color: rgba(0, 0, 0, 0.1608)">|</span>
           <span style="color: #626262; font-size: 12px">
             上传：{{ item.uploadTime.replace(/-/g, "/") }}
@@ -119,9 +119,9 @@ const scroll = (e) => {
 .album-content__dir-list-pic {
   display: grid;
   grid-template-columns: repeat(auto-fill, 260px);
-  grid-template-rows: repeat(auto-fill, 260px);
+  grid-template-rows: repeat(auto-fill, 300px);
   justify-content: space-between;
-  row-gap: 50px;
+  row-gap: 20px;
 }
 
 .album-content__dir-pic-info {
