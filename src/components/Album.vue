@@ -3,6 +3,7 @@
     <div class="ablunm__glass">
       <AlbumContent />
       <Header />
+      <BackTop />
     </div>
     <AlbumScrollBar />
   </div>
@@ -12,6 +13,7 @@
 import Header from "./Header.vue";
 import AlbumContent from "./AlbumContent.vue";
 import AlbumScrollBar from "./AlbumScrollBar.vue";
+import BackTop from "./BackTop.vue";
 </script>
 
 <style scoped>

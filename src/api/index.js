@@ -7,6 +7,7 @@ const state = reactive({
 const hoverHead = ref(false);
 const chunkHeight = ref(0);
 const top = ref(0);
+const scrollToTop = ref(false);
 export const fetchPicList = async () => {
   state.loading = true;
   const res = await fetch("https://general.feicut.com/resource/project.json");
@@ -44,5 +45,15 @@ export const useScrollBar = () => {
     setChunkHeight,
     top,
     setTop,
+  };
+};
+
+export const useBackTop = () => {
+  const setScrollToTop = (val) => {
+    scrollToTop.value = val;
+  };
+  return {
+    scrollToTop,
+    setScrollToTop
   };
 };

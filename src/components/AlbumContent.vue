@@ -6,7 +6,7 @@
         src="../assets/pic_logo.png"
         style="object-fit: contain; margin-right: 10px"
       />
-      <span>视频</span>
+      <span ref="anchor">视频</span>
     </div>
     <div class="album-content__dir-list" style="margin-bottom: 50px">
       <AblutmItem
@@ -46,7 +46,7 @@
 
 <script setup>
 import AblutmItem from "./AlbumItem.vue";
-import { usePicList, useHover, useScrollBar } from "../api/index";
+import { usePicList, useHover, useScrollBar, useBackTop } from "../api/index";
 import { ref, watch, onMounted, nextTick } from "vue";
 let picList = ref([]);
 let videiList = ref([]);
@@ -54,6 +54,8 @@ const { hoverHead } = useHover();
 const height = ref("16.5%");
 const ablumContent = ref(null);
 const { setChunkHeight, setTop } = useScrollBar();
+const { scrollToTop, setScrollToTop } = useBackTop();
+const anchor = ref(null);
 usePicList().then((res) => {
   picList.value = res.picList[0].imageList.toSpliced(16);
   videiList.value = res.picList[0].videoList.toSpliced(12);
@@ -70,8 +72,29 @@ watch(
     height.value = newVal ? "22%" : "16.5%";
   }
 );
-const scroll = (e) => {
+watch(
+  () => scrollToTop.value,
+  (newVal) => {
+    if (newVal) {
+      anchor.value.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }
+);
+const scroll = () => {
   setTop(ablumContent.value.scrollTop / ablumContent.value.scrollHeight);
+  clearScrollState();
+};
+let timer = null;
+const clearScrollState = () => {
+  clearTimeout(timer);
+  if (scrollToTop.value) {
+    timer = setTimeout(function () {
+      setScrollToTop(false);
+    }, 100);
+  }
 };
 </script>
 
