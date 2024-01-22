@@ -19,7 +19,7 @@ import BackTop from "./BackTop.vue";
 <style scoped>
 .ablunm__container {
   min-width: 1500px;
-  min-height: 600px;
+  min-height: 700px;
   width: 100%;
   height: 100%;
   box-sizing: border-box;

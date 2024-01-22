@@ -5,7 +5,7 @@
     @mouseleave="mouseleave"
   >
     <div class="ablunm__breviary-container">
-      <AlbumBreviaryAll />
+      <AlbumBreviaryAll ref="albumBreviaryAllRef" />
       <img
         src="../assets/prev_btn.png"
         class="btn prev"
@@ -27,14 +27,16 @@
           :hvoerState="hvoerState"
         />
       </div>
-      <div class="album__breviary-etc">...</div>
+      <div class="album__breviary-etc">
+        <img src="../assets/etc.png" />
+      </div>
     </div>
     <div class="ablunm__breviary-active">全部</div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick } from "vue";
+import { ref, nextTick, onMounted } from "vue";
 import { usePicList, useHover } from "../api/index";
 import AlbumBreviaryItem from "./AlbumBreviaryItem.vue";
 import AlbumBreviaryAll from "./AlbumAll.vue";
@@ -44,6 +46,18 @@ const albumBreviaryContainer = ref(null);
 const hvoerState = ref(false);
 const breviaryList = ref([]);
 const curreneHeadIndex = ref(0);
+const albumBreviaryAllRef = ref(null);
+const etcHeight = ref(0);
+onMounted(() => {
+  nextTick(() => {
+    etcHeight.value = `${albumBreviaryAllRef.value.$el.clientHeight - 3}px`;
+  });
+  window.onresize = () => {
+    return (() => {
+      etcHeight.value = `${albumBreviaryAllRef.value.$el.clientHeight - 3}px`;
+    })();
+  };
+});
 const getBreviaryList = async () => {
   const state = await usePicList();
   tempState.value = state;
@@ -165,16 +179,19 @@ const next = () => {
 }
 .album__breviary-etc {
   position: absolute;
-  top: 0;
+  top: 0px;
   right: 0px;
-  width: 2vw;
-  height: 2vw;
+  width: v-bind(etcHeight);
+  height: v-bind(etcHeight);
+  line-height: v-bind(etcHeight);
   border-radius: 8px;
   opacity: 1;
   background: rgba(0, 0, 0, 0.1608);
   color: #fff;
   letter-spacing: 1px;
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .img-box__mask {
   position: absolute;
