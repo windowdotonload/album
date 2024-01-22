@@ -53,9 +53,11 @@ let videiList = ref([]);
 const { hoverHead } = useHover();
 const height = ref("16.5%");
 const ablumContent = ref(null);
-const { setChunkHeight, setTop } = useScrollBar();
+const { top, setChunkHeight, setTop } = useScrollBar();
 const { scrollToTop, setScrollToTop } = useBackTop();
 const anchor = ref(null);
+const manualScroll = ref(false);
+const wheelScroll = ref(false);
 usePicList().then((res) => {
   picList.value = res.picList[0].imageList.toSpliced(16);
   videiList.value = res.picList[0].videoList.toSpliced(12);
@@ -72,6 +74,7 @@ watch(
     height.value = newVal ? "22%" : "16.5%";
   }
 );
+
 watch(
   () => scrollToTop.value,
   (newVal) => {
@@ -83,13 +86,35 @@ watch(
     }
   }
 );
+watch(
+  () => top.value,
+  (newVal) => {
+    console.log(",newValnewVal", newVal);
+    if(wheelScroll.value) return;
+    manualScroll.value = true;
+    ablumContent.value.scrollTop = ablumContent.value.scrollHeight * newVal;
+    ablumContent.value.scrollTo({
+      left: 0,
+      top: ablumContent.value.scrollHeight * newVal,
+      behavior: "smooth",
+    });
+  }
+);
 const scroll = () => {
-  setTop(ablumContent.value.scrollTop / ablumContent.value.scrollHeight);
+  wheelScroll.value = true;
   clearScrollState();
+  if (manualScroll.value) return;
+  setTop(ablumContent.value.scrollTop / ablumContent.value.scrollHeight);
 };
 let timer = null;
+let scrollTimer = null;
 const clearScrollState = () => {
   clearTimeout(timer);
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(() => {
+    manualScroll.value = false;
+    wheelScroll.value = false;
+  }, 100);
   if (scrollToTop.value) {
     timer = setTimeout(function () {
       setScrollToTop(false);
@@ -109,6 +134,7 @@ const clearScrollState = () => {
   overflow: scroll;
   top: 0;
   left: 0;
+  transition: all 0.3s ease;
 }
 .album-content::-webkit-scrollbar {
   display: none;
