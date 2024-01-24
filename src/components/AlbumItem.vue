@@ -6,7 +6,7 @@
       height: `${height}px` || `168px`,
     }"
   >
-    <img
+    <Image
       :src="type == 'video' ? albumItem.poster : albumItem.url"
       :style="{
         objectFit: 'cover',
@@ -61,6 +61,7 @@
 
 <script setup>
 import { defineProps } from "vue";
+import Image from "./AlbumImgLoader.vue";
 const props = defineProps({
   albumItem: Object,
   width: { type: Number, default: 300 },

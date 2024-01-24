@@ -89,7 +89,6 @@ watch(
 watch(
   () => top.value,
   (newVal) => {
-    console.log(",newValnewVal", newVal);
     if(wheelScroll.value) return;
     manualScroll.value = true;
     ablumContent.value.scrollTop = ablumContent.value.scrollHeight * newVal;

@@ -1,6 +1,12 @@
 <template>
   <div class="img-box__container">
-    <img :src="breviaryInfo.poster" class="img_box" />
+    <img src="../assets/all_bg.png" class="img_box" v-show="!loaded" />
+    <img
+      v-show="loaded"
+      :src="breviaryInfo.poster"
+      class="img_box"
+      @load="load"
+    />
   </div>
 </template>
 
@@ -10,6 +16,10 @@ const props = defineProps({
   breviaryInfo: Object,
   hvoerState: Boolean,
 });
+const loaded = ref(false);
+const load = () => {
+  loaded.value = true;
+};
 </script>
 
 <style scoped>
