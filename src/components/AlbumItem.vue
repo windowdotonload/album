@@ -61,14 +61,35 @@
 </template>
 
 <script setup>
-import { ref, defineProps } from "vue";
+import { ref, onMounted, defineEmits, defineProps } from "vue";
 import Image from "./AlbumImgLoader.vue";
 const ablumContentItem = ref(null);
 const props = defineProps({
   albumItem: Object,
+  index: Number,
   width: { type: Number, default: 300 },
   height: { type: Number, default: 168 },
   type: String,
+});
+const emits = defineEmits(["handleVirtuallist"]);
+onMounted(() => {
+  const intersectionObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      emits("handleVirtuallist", {
+        isIntersecting: entries[0].isIntersecting,
+        index: props.index,
+        type: props.type,
+      });
+    } else {
+      emits("handleVirtuallist", {
+        isIntersecting: entries[0].isIntersecting,
+        index: props.index,
+        type: props.type,
+      });
+    }
+  });
+
+  intersectionObserver.observe(ablumContentItem.value);
 });
 </script>
 

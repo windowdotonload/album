@@ -10,10 +10,12 @@
     </div>
     <div class="album-content__dir-list" style="margin-bottom: 50px">
       <AblutmItem
-        v-for="item in videiList"
+        v-for="(item, index) in videiList"
         :key="item.id"
+        :index="index"
         :albumItem="item"
         type="video"
+        @handleVirtuallist="handleVirtuallist"
       />
     </div>
     <p class="album-content__view-more" @click="viewMoreVideo">查看更多</p>
@@ -26,11 +28,18 @@
     </div>
     <div class="album-content__dir-list-pic">
       <div
-        v-for="item in picList"
+        v-for="(item, index) in picList"
         :key="item.id"
         class="album-content__dir-list-outer"
       >
-        <AblutmItem :albumItem="item" :width="200" :height="200" type="pic" />
+        <AblutmItem
+          :index="index"
+          :albumItem="item"
+          :width="200"
+          :height="200"
+          type="pic"
+          @handleVirtuallist="handleVirtuallist"
+        />
         <div class="album-content__dir-pic-info">
           <span class="album-content__info-name">
             {{ item.name }}
@@ -61,12 +70,44 @@ const manualScroll = ref(false);
 const wheelScroll = ref(false);
 let videoPage = 1;
 let rawList = [];
+const indexRecord = {
+  picIndex: { topLeave: 0, bottomEnter: 0 },
+  videoIndex: { topLeave: 0, bottomEnter: 0 },
+};
+
 usePicList().then((res) => {
   rawList = markRaw(res.picList[0]);
   picList.value = res.picList[0].imageList.toSpliced(16);
-  videiList.value = res.picList[0].videoList.toSpliced(12);
+  videiList.value = res.picList[0].videoList.toSpliced(20);
   calcScrollBar();
 });
+
+const handleVirtuallist = ({ isIntersecting, index, type }) => {
+  // console.log("isIntersecting,", isIntersecting, index, type);
+  const indexKey = `${type}Index`;
+  const indexTarget = indexRecord[indexKey];
+  if (isIntersecting) {
+    indexTarget.bottomEnter = Math.max(indexTarget.bottomEnter, index);
+  } else {
+    console.log("isIntersectingfalse", isIntersecting, index, type);
+    const tempIndex = Math.max(indexTarget.topLeave, index);
+    if (tempIndex < indexTarget.bottomEnter) {
+      indexTarget.topLeave = Math.max(tempIndex, index);
+    } else {
+      indexTarget.topLeave = indexTarget.topLeave;
+    }
+  }
+  flush();
+};
+let pending = true;
+const flush = () => {
+  if (!pending) return;
+  pending = false;
+  setTimeout(() => {
+    pending = true;
+    console.log(indexRecord);
+  });
+};
 const calcScrollBar = () => {
   nextTick(() => {
     const { scrollHeight, offsetHeight } = ablumContent.value;
@@ -76,7 +117,7 @@ const calcScrollBar = () => {
 };
 const viewMoreVideo = () => {
   if (picList.value.length == rawList.videoList.length) return;
-  videiList.value = rawList.videoList.toSpliced(16 * ++videoPage);
+  videiList.value = rawList.videoList.toSpliced(20 * ++videoPage);
   calcScrollBar();
 };
 watch(
