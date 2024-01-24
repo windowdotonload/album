@@ -59,7 +59,7 @@ watch(
   width: 6px;
   border-radius: 6px;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.5);
 }
 .scroll-bar__thunk {
   background: #fff;

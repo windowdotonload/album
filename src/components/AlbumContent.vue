@@ -16,6 +16,7 @@
         type="video"
       />
     </div>
+    <p class="album-content__view-more" @click="viewMoreVideo">查看更多</p>
     <div class="album-content__title-dir">
       <img
         src="../assets/video_logo.png"
@@ -47,7 +48,7 @@
 <script setup>
 import AblutmItem from "./AlbumItem.vue";
 import { usePicList, useHover, useScrollBar, useBackTop } from "../api/index";
-import { ref, watch, onMounted, nextTick } from "vue";
+import { ref, watch, markRaw, nextTick } from "vue";
 let picList = ref([]);
 let videiList = ref([]);
 const { hoverHead } = useHover();
@@ -58,16 +59,26 @@ const { scrollToTop, setScrollToTop } = useBackTop();
 const anchor = ref(null);
 const manualScroll = ref(false);
 const wheelScroll = ref(false);
+let videoPage = 1;
+let rawList = [];
 usePicList().then((res) => {
+  rawList = markRaw(res.picList[0]);
   picList.value = res.picList[0].imageList.toSpliced(16);
   videiList.value = res.picList[0].videoList.toSpliced(12);
+  calcScrollBar();
+});
+const calcScrollBar = () => {
   nextTick(() => {
     const { scrollHeight, offsetHeight } = ablumContent.value;
     const chunkHeight = offsetHeight / scrollHeight;
     setChunkHeight(chunkHeight);
   });
-});
-
+};
+const viewMoreVideo = () => {
+  if (picList.value.length == rawList.videoList.length) return;
+  videiList.value = rawList.videoList.toSpliced(16 * ++videoPage);
+  calcScrollBar();
+};
 watch(
   () => hoverHead.value,
   (newVal) => {
@@ -89,7 +100,7 @@ watch(
 watch(
   () => top.value,
   (newVal) => {
-    if(wheelScroll.value) return;
+    if (wheelScroll.value) return;
     manualScroll.value = true;
     ablumContent.value.scrollTop = ablumContent.value.scrollHeight * newVal;
     ablumContent.value.scrollTo({
@@ -199,5 +210,10 @@ const clearScrollState = () => {
   width: 10px;
   height: 30px;
   background: red;
+}
+.album-content__view-more {
+  margin: 0;
+  margin-bottom: 10px;
+  cursor: pointer;
 }
 </style>
