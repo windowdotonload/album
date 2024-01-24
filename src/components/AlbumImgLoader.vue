@@ -27,7 +27,7 @@ const load = () => {
   position: absolute;
   top: 0;
   left: 0;
-  opacity: 0.7;
+  opacity: 0.3;
   transition: all 0.3s ease;
 }
 </style>

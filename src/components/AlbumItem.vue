@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="ablumContentItem"
     class="album-content__img-box"
     :style="{
       width: `${width}px` || `300px`,
@@ -60,8 +61,9 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue";
+import { ref, defineProps } from "vue";
 import Image from "./AlbumImgLoader.vue";
+const ablumContentItem = ref(null);
 const props = defineProps({
   albumItem: Object,
   width: { type: Number, default: 300 },
