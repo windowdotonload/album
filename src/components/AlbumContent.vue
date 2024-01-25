@@ -10,7 +10,7 @@
     </div>
     <div class="album-content__dir-list" style="margin-bottom: 50px">
       <AblutmItem
-        v-for="(item, index) in videiList"
+        v-for="(item, index) in videoList"
         :key="item.id"
         :index="index"
         :albumItem="item"
@@ -51,6 +51,7 @@
         </div>
       </div>
     </div>
+    <p class="album-content__view-more" @click="viewMorePic">查看更多</p>
   </div>
 </template>
 
@@ -59,7 +60,7 @@ import AblutmItem from "./AlbumItem.vue";
 import { usePicList, useHover, useScrollBar, useBackTop } from "../api/index";
 import { ref, watch, markRaw, nextTick } from "vue";
 let picList = ref([]);
-let videiList = ref([]);
+let videoList = ref([]);
 const { hoverHead } = useHover();
 const height = ref("16.5%");
 const ablumContent = ref(null);
@@ -71,42 +72,80 @@ const wheelScroll = ref(false);
 let videoPage = 1;
 let rawList = [];
 const indexRecord = {
-  picIndex: { topLeave: 0, bottomEnter: 0 },
-  videoIndex: { topLeave: 0, bottomEnter: 0 },
+  picIndex: { topLeave: Infinity, bottomEnter: 0 },
+  videoIndex: { topLeave: Infinity, bottomEnter: 0 },
 };
+const visMap = {
+  picVisMap: {},
+  videoVisMap: {},
+};
+let picRawListEndIndex = 16;
+let videoRawListEndIndex = 20;
 
 usePicList().then((res) => {
   rawList = markRaw(res.picList[0]);
-  picList.value = res.picList[0].imageList.toSpliced(16);
-  videiList.value = res.picList[0].videoList.toSpliced(20);
+  picList.value = res.picList[0].imageList.toSpliced(picRawListEndIndex);
+  videoList.value = res.picList[0].videoList.toSpliced(videoRawListEndIndex);
   calcScrollBar();
 });
 
 const handleVirtuallist = ({ isIntersecting, index, type }) => {
-  // console.log("isIntersecting,", isIntersecting, index, type);
-  const indexKey = `${type}Index`;
-  const indexTarget = indexRecord[indexKey];
-  if (isIntersecting) {
-    indexTarget.bottomEnter = Math.max(indexTarget.bottomEnter, index);
-  } else {
-    console.log("isIntersectingfalse", isIntersecting, index, type);
-    const tempIndex = Math.max(indexTarget.topLeave, index);
-    if (tempIndex < indexTarget.bottomEnter) {
-      indexTarget.topLeave = Math.max(tempIndex, index);
-    } else {
-      indexTarget.topLeave = indexTarget.topLeave;
-    }
-  }
-  flush();
+  const visMapTarget = visMap[`${type}VisMap`];
+  visMapTarget[index] = isIntersecting;
+  debounce();
 };
-let pending = true;
-const flush = () => {
-  if (!pending) return;
-  pending = false;
-  setTimeout(() => {
-    pending = true;
-    console.log(indexRecord);
+let timeStamp = null;
+const debounce = () => {
+  if (timeStamp) clearTimeout(timeStamp);
+  timeStamp = setTimeout(() => {
+    console.log("timeStamp", timeStamp);
+    const [picVisShowIndex, videoVisShowIndex] = handleNextLoadIndex();
+    assignNewList(picVisShowIndex, videoVisShowIndex);
+    timeStamp = null;
+  }, 1000);
+};
+const handleNextLoadIndex = () => {
+  const [picVisShowIndex, videoVisShowIndex] = ["pic", "video"].map((key) => {
+    const mapKey = `${key}VisMap`;
+    const visMapTarget = visMap[mapKey];
+    return Object.keys(visMapTarget)
+      .map((i) => {
+        if (visMapTarget[i]) return i;
+      })
+      .filter((i) => i !== undefined);
   });
+  return [picVisShowIndex, videoVisShowIndex];
+};
+const assignNewList = (picVisShowIndex, videoVisShowIndex) => {
+  indexRecord.picIndex.topLeave = Math.min(...picVisShowIndex);
+  indexRecord.picIndex.bottomEnter = Math.max(...picVisShowIndex);
+  indexRecord.videoIndex.topLeave = Math.min(...videoVisShowIndex);
+  indexRecord.videoIndex.bottomEnter = Math.max(...videoVisShowIndex);
+  console.log("picVisShowIndex", indexRecord);
+
+  const picEndIndex =
+    indexRecord.picIndex.bottomEnter + 10 >= rawList.imageList.length - 1
+      ? rawList.imageList.length - 1
+      : indexRecord.picIndex.bottomEnter + 20;
+  const picStartIndex = picEndIndex - 40 < 0 ? 0 : picEndIndex - 40;
+
+  const videoEndIndex =
+    indexRecord.videoIndex.bottomEnter + 10 >= rawList.imageList.length - 1
+      ? rawList.imageList.length - 1
+      : indexRecord.videoIndex.bottomEnter + 10;
+  const videoStartIndex = videoEndIndex - 40 < 0 ? 0 : videoEndIndex - 40;
+  videoList.value = rawList.videoList.slice(videoStartIndex, videoEndIndex);
+  videoRawListEndIndex = videoEndIndex;
+  console.log("picVisShowIndex", picStartIndex, picEndIndex);
+  console.log("videoVisShowIndex", videoStartIndex, videoEndIndex);
+  if (
+    Math.abs(indexRecord.picIndex.topLeave) == Infinity ||
+    Math.abs(indexRecord.videoIndex.topLeave) == Infinity
+  )
+    return calcScrollBar();
+  picList.value = rawList.imageList.slice(picStartIndex, picEndIndex);
+  picRawListEndIndex = picEndIndex;
+  calcScrollBar();
 };
 const calcScrollBar = () => {
   nextTick(() => {
@@ -116,8 +155,8 @@ const calcScrollBar = () => {
   });
 };
 const viewMoreVideo = () => {
-  if (picList.value.length == rawList.videoList.length) return;
-  videiList.value = rawList.videoList.toSpliced(20 * ++videoPage);
+  if (videoList.value.length == rawList.videoList.length) return;
+  videoList.value = rawList.videoList.toSpliced(20 * ++videoPage);
   calcScrollBar();
 };
 watch(
